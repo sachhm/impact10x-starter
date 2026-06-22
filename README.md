@@ -15,6 +15,14 @@ The **five boxes** below are the mental model used across the program: once you
 know which box does what, you always know where to make a change. Build it, ship
 a live URL, pitch on Day 3.
 
+> **If you forked this, start here.** This template already contains all five
+> boxes, so build-prompts **#1–3** (app shell, AI call, save-on-refresh) are
+> **already built** — read them as a guide to what you'll be EDITING, not steps
+> to run again. Your first real moves: **(1)** set your AI key + model in env
+> vars (see [Turn on real AI](#turn-on-real-ai-optional)), and **(2)** edit the
+> `SYSTEM_PROMPT` in the Intelligence box (`app/api/generate/route.ts`). Then
+> carry on from build-prompt **#4 (Connections) → #6 (Deploy) → #7 (Demo)**.
+
 ---
 
 ## The five boxes (the whole map)
@@ -44,7 +52,10 @@ a live URL, pitch on Day 3.
 
 ## Run it (3 steps)
 
-You need [Node.js](https://nodejs.org) installed. Then:
+You need [Node.js](https://nodejs.org) **22 or newer** — Vercel deploys on 24 by
+default. If you use [nvm](https://github.com/nvm-sh/nvm), just run `nvm use` in
+this folder — it reads the included `.nvmrc` and picks the right version for
+you. Then:
 
 ```bash
 npm install        # download the building blocks (once)
