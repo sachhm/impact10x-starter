@@ -20,7 +20,7 @@ export default function Home() {
 
   // When the screen first loads, pull saved answers out of MEMORY (BOX 4).
   useEffect(() => {
-    setResults(loadResults());
+    loadResults().then(setResults);
   }, []);
 
   // Runs when the user clicks "Ask".
@@ -46,11 +46,16 @@ export default function Home() {
       // Build a brand-new list with the new answer on top (immutable style),
       // then save it to MEMORY (BOX 4) so it survives a refresh.
       const next: Result[] = [
-        { id: crypto.randomUUID(), prompt, answer: data.answer },
+        {
+          id: crypto.randomUUID(),
+          prompt,
+          answer: data.answer,
+          created_at: new Date().toISOString(),
+        },
         ...results,
       ];
       setResults(next);
-      saveResults(next);
+      await saveResults(next);
       setInput(""); // clear the box for the next question
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");

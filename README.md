@@ -1,11 +1,19 @@
-# AI MVP Starter
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://impact10x.com.au/wp-content/uploads/2025/03/Impact-10x-logo-white.svg">
+    <img alt="Impact10X" src="https://impact10x.com.au/wp-content/uploads/2025/03/Impact10x-logo-black-big.svg" width="240">
+  </picture>
+</p>
 
-A tiny but complete AI app. It does **one** thing: you type something, the AI
-replies, and your answers are saved. That's the whole app.
+# Impact10X — AI MVP Starter
 
-The point of this repo is to **teach you how an AI app is put together**. The
-code is built from **five labelled boxes**. Once you know which box does what,
-you always know where to make a change.
+> Guiding innovators to turn problems into success stories.
+
+This is the starter template for the **Impact10X 3-Day AI Simulator** — the
+starting point for teams going from idea to a working, live MVP in three days.
+The **five boxes** below are the mental model used across the program: once you
+know which box does what, you always know where to make a change. Build it, ship
+a live URL, pitch on Day 3.
 
 ---
 
@@ -83,8 +91,8 @@ in a real database (shared across devices, kept forever), switch to
 [Supabase](https://supabase.com):
 
 1. Create a free Supabase project and a table called `results` with columns
-   `id` (text), `prompt` (text), `answer` (text), `created_at` (timestamp,
-   default `now()`).
+   `id` (text, primary key — `upsert` uses it to avoid duplicate rows),
+   `prompt` (text), `answer` (text), `created_at` (timestamp, default `now()`).
 2. `npm install @supabase/supabase-js`.
 3. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `.env`.
 4. In **`lib/memory.ts`**, swap the localStorage functions for the
@@ -92,3 +100,11 @@ in a real database (shared across devices, kept forever), switch to
 
 Nothing else in the app changes — that's the whole point of keeping MEMORY in
 its own box.
+
+---
+
+<p align="center">
+  Delivered by JCU and Mindesigns, supported by the Queensland Government through
+  the Regional Enablers Program.<br>
+  <a href="https://impact10x.com.au/simulator/">impact10x.com.au/simulator</a>
+</p>

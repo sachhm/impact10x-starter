@@ -14,13 +14,19 @@ export type Result = {
   id: string; // a unique label so React can tell rows apart
   prompt: string; // what the user typed
   answer: string; // what the AI replied
+  created_at: string; // when it was made — lets a database sort newest-first
 };
 
 // The single name of our box in localStorage. Change it and old saves hide.
 const STORAGE_KEY = "ai-mvp-results";
 
+// Both functions below are ASYNC (they return a Promise). The browser version
+// doesn't really need to wait for anything, but a real database WOULD — so we
+// keep the same async shape here. That's what makes the Supabase swap below a
+// genuine drop-in: the rest of the app already `await`s these.
+
 // READ everything we've saved so far. Returns an empty list if nothing's there.
-export function loadResults(): Result[] {
+export async function loadResults(): Promise<Result[]> {
   // localStorage only exists in the browser, so guard against running on the server.
   if (typeof window === "undefined") return [];
   try {
@@ -35,7 +41,7 @@ export function loadResults(): Result[] {
 // SAVE the whole list back into the browser box.
 // We always write a brand-new list (never edit the old one in place) — this is
 // the "immutable" style: safer and easier to reason about.
-export function saveResults(results: Result[]): void {
+export async function saveResults(results: Result[]): Promise<void> {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
 }
@@ -64,7 +70,10 @@ export function saveResults(results: Result[]): void {
 //     return data ?? [];
 //   }
 //
-//   export async function saveResult(result: Result): Promise<void> {
-//     await supabase.from("results").insert(result);
+//   // Same signature as the localStorage version: takes the WHOLE list.
+//   // "upsert" inserts new rows and updates any that already exist (matched by
+//   // id), so re-saving the full list each time is safe and idempotent.
+//   export async function saveResults(results: Result[]): Promise<void> {
+//     await supabase.from("results").upsert(results);
 //   }
 // ============================================================================
