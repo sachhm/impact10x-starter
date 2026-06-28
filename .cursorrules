@@ -1,0 +1,8 @@
+This is an educational Next.js starter. Keep all code beginner-readable.
+Preserve the Five Boxes comments in every file.
+The AI provider is configured via env vars. Never hardcode model names or keys.
+Mock mode with no AI_API_KEY must always work without errors.
+Use shadcn/ui components. Do not introduce other UI libraries.
+Use the Vercel AI SDK (ai package). Do not use the raw openai package.
+When modifying AI behaviour, only edit SYSTEM_PROMPT in app/api/chat/route.ts.
+Keep one-click Vercel deployment working.
