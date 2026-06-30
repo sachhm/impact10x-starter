@@ -68,6 +68,7 @@ export default function Home() {
     handleSubmit,
     isLoading,
     error,
+    reload,
     setMessages,
   } = useChat({
     api: "/api/chat",
@@ -179,7 +180,7 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4 pb-4">
+                <div className="space-y-4 pb-4" role="log" aria-live="polite">
                   {messages.map((message) => {
                     const text = messageText(message);
                     const isUser = message.role === "user";
@@ -239,8 +240,19 @@ export default function Home() {
           {error && (
             <Alert variant="destructive" className="mb-3">
               <AlertTitle>Something went wrong</AlertTitle>
-              <AlertDescription>
-                The assistant could not reply. Please try again.
+              <AlertDescription className="flex items-center justify-between gap-3">
+                <span>The assistant could not reply.</span>
+                {/* reload() re-sends the last message — no need to retype it. */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void reload()}
+                  disabled={isLoading}
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Retry
+                </Button>
               </AlertDescription>
             </Alert>
           )}
