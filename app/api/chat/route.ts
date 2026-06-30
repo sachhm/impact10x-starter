@@ -16,7 +16,18 @@ import {
   type Message,
 } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
+import { z } from "zod";
 import { getExternalContext, getContextTool } from "@/lib/connections";
+
+// What a valid request body looks like. zod checks the shape AND caps the
+// message count, so a malformed or oversized payload is rejected with a clear
+// 400 instead of crashing deeper in the code or running up token cost.
+const RequestSchema = z.object({
+  messages: z
+    .array(z.object({ role: z.string(), content: z.string() }).passthrough())
+    .min(1)
+    .max(100),
+});
 
 // ----------------------------------------------------------------------------
 // BOX 3 of 5: INTELLIGENCE — the AI's personality.
@@ -59,16 +70,17 @@ function mockStream(text: string): Response {
 export async function POST(request: Request) {
   // --- Validate the input. Never trust data coming from outside. ---
   const body = await request.json().catch(() => null);
-  const messages = body?.messages;
+  const parsed = RequestSchema.safeParse(body);
 
-  if (!Array.isArray(messages)) {
+  if (!parsed.success) {
     return Response.json(
-      { error: "Please send a messages array." },
+      { error: "Please send 1–100 messages, each with a role and content." },
       { status: 400 },
     );
   }
 
-  const prompt = lastUserText(messages as Message[]);
+  const messages = parsed.data.messages as unknown as Message[];
+  const prompt = lastUserText(messages);
   if (!prompt) {
     return Response.json(
       { error: "Please type something first." },

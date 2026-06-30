@@ -113,12 +113,20 @@ export default function Home() {
   const helperText = useMemo(() => {
     if (overLimit) return "Shorten your question before sending.";
     if (isLoading) return "The assistant is replying...";
-    return "Mock mode works even when AI_API_KEY is blank.";
+    // Don't assert which mode is live (the screen can't see the server's key).
+    // True in both modes: real key → real answers, no key → mock answers.
+    return "No AI key? Replies run in mock mode until you add one.";
   }, [isLoading, overLimit]);
 
   async function copyMessage(text: string) {
-    await navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard");
+    // Clipboard can reject (denied permission, non-secure context) — tell the
+    // user instead of failing silently with an unhandled promise rejection.
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied to clipboard");
+    } catch {
+      toast.error("Couldn't copy — your browser blocked clipboard access.");
+    }
   }
 
   async function clearChat() {
