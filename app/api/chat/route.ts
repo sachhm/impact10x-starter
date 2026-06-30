@@ -107,13 +107,24 @@ export async function POST(request: Request) {
       maxSteps: 2,
     });
 
-    return result.toDataStreamResponse();
+    // IMPORTANT: the provider call happens WHILE the stream is read, AFTER this
+    // function returns — so a bad key / wrong AI_BASE_URL / wrong AI_MODEL is
+    // NOT thrown by the try/catch below. getErrorMessage is where those real
+    // failures surface, so we log the detail and tell you which thing to check.
+    return result.toDataStreamResponse({
+      getErrorMessage(error) {
+        console.error("AI stream failed:", error);
+        const detail = error instanceof Error ? error.message : String(error);
+        return `The AI call failed: ${detail}. Check your AI_API_KEY, AI_BASE_URL, and AI_MODEL in .env.`;
+      },
+    });
   } catch (error) {
-    // Show a friendly message to the user; log the detail for ourselves.
-    console.error("AI call failed:", error);
+    // This now only catches SETUP errors (e.g. a malformed messages array that
+    // breaks convertToCoreMessages) — a client mistake, so return 400 not 502.
+    console.error("AI request setup failed:", error);
     return Response.json(
-      { error: "The AI is unavailable right now. Please try again." },
-      { status: 502 },
+      { error: "Could not build the AI request from those messages." },
+      { status: 400 },
     );
   }
 }

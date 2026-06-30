@@ -112,6 +112,17 @@ If `AI_API_KEY` is blank, the app stays in friendly mock mode.
    (same values as your `.env`).
 4. Click **Deploy**. Done — you have a live URL.
 
+> ⚠️ **Your `/api/chat` URL is public and spends your AI key.** Anyone who gets
+> your live URL can send it messages, and every message uses *your* AI credits.
+> For a 3-day build that's fine if you do two things:
+> 1. **Use a free-tier key** (Google Gemini or Groq) — their own limits cap how
+>    much anyone can run up.
+> 2. **Set a spend cap** in your AI provider's dashboard.
+>
+> Going past the event / sharing the URL widely? Add rate limiting before then
+> (e.g. [`@upstash/ratelimit`](https://github.com/upstash/ratelimit-js) or a
+> Vercel Firewall rule on `/api/chat`).
+
 ---
 
 ## Upgrading MEMORY to Supabase (when you outgrow the browser)

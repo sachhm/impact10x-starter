@@ -133,9 +133,9 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-73px)] flex-col bg-zinc-50">
+    <main className="flex min-h-[calc(100dvh-73px)] flex-col bg-zinc-50">
       <section className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6 pb-36 sm:px-6 lg:px-8">
-        <Card className="flex min-h-[60vh] flex-1 flex-col border-zinc-200 shadow-sm">
+        <Card className="flex min-h-[60dvh] flex-1 flex-col border-zinc-200 shadow-sm">
           <CardHeader className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
@@ -162,7 +162,7 @@ export default function Home() {
           </CardHeader>
 
           <CardContent className="min-h-0 flex-1">
-            <ScrollArea className="h-[calc(100vh-270px)] min-h-[380px] pr-4">
+            <ScrollArea className="h-[calc(100dvh-270px)] min-h-[380px] pr-4">
               {!hasLoadedSavedChat ? (
                 <div className="flex h-full items-center justify-center text-sm text-zinc-500">
                   Loading saved chat...
