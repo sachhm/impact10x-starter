@@ -77,6 +77,10 @@ cp .env.example .env    # create your local settings file
 npm run dev             # start the app
 ```
 
+> **Don't delete `package-lock.json`.** It pins the exact, tested versions of
+> every dependency. Keeping it means `npm install` gives you the same working
+> setup we tested — delete it and you may pull in newer, untested versions.
+
 Open **http://localhost:3000**. It works **immediately in mock mode** — no AI
 account needed. You'll get streamed fake answers so you can see the whole flow
 first.
