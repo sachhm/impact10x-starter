@@ -60,6 +60,7 @@ function TypingDots() {
 export default function Home() {
   const [hasLoadedSavedChat, setHasLoadedSavedChat] = useState(false);
   const chatMessagesRef = useRef<Message[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     messages,
@@ -139,6 +140,9 @@ export default function Home() {
     event.preventDefault();
     if (!canSubmit) return;
     handleSubmit(event);
+    // Keep keyboard focus on the input — the Send button disables on submit,
+    // which would otherwise drop focus to <body> between turns.
+    inputRef.current?.focus();
   }
 
   return (
@@ -267,6 +271,7 @@ export default function Home() {
 
           <form onSubmit={submitIfAllowed} className="flex gap-2">
             <Input
+              ref={inputRef}
               value={input}
               onChange={handleInputChange}
               placeholder="Ask about your idea, customers, pitch, or next step..."

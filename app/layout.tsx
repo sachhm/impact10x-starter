@@ -1,12 +1,17 @@
 // The "shell" that wraps every page. It loads the styles, top nav, and toaster.
 // You rarely need to edit this file.
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Impact10x AI Starter",
   description: "A streamed AI chat starter built from five clearly-labelled boxes.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

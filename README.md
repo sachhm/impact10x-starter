@@ -66,10 +66,10 @@ SDK while still keeping the code heavily commented and beginner-readable.
 
 ## Run it (3 steps)
 
-You need [Node.js](https://nodejs.org) **22 or newer** — Vercel deploys on 24 by
-default. If you use [nvm](https://github.com/nvm-sh/nvm), just run `nvm use` in
-this folder — it reads the included `.nvmrc` and picks the right version for
-you. Then:
+You need [Node.js](https://nodejs.org) **24** (the version in the included
+`.nvmrc`, which is also Vercel's default); 22 also works. If you use
+[nvm](https://github.com/nvm-sh/nvm), just run `nvm use` in this folder — it
+reads the `.nvmrc` and picks the right version for you. Then:
 
 ```bash
 npm install             # download the building blocks once
@@ -130,7 +130,8 @@ If `AI_API_KEY` is blank, the app stays in friendly mock mode.
 Right now chats are saved in the browser (`localStorage`). That's per-device and
 gets cleared if the user wipes their browser. When you want chats stored in a
 real database (shared across devices, kept forever), switch to
-[Supabase](https://supabase.com).
+[Supabase](https://supabase.com). The `@supabase/supabase-js` package is already
+installed for this — don't remove it from `package.json` if you plan to use it.
 
 ### 1. Create the table
 
