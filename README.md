@@ -15,13 +15,27 @@ The **five boxes** below are the mental model used across the program: once you
 know which box does what, you always know where to make a change. Build it, ship
 a live URL, pitch on Day 3.
 
-> **If you forked this, start here.** This template already contains all five
-> boxes, so build-prompts **#1–3** (app shell, AI call, save-on-refresh) are
-> **already built** — read them as a guide to what you'll be EDITING, not steps
-> to run again. Your first real moves: **(1)** set your AI key + model in env
-> vars (see [Turn on real AI](#turn-on-real-ai-optional)), and **(2)** edit the
-> `SYSTEM_PROMPT` in the Intelligence box (`app/api/generate/route.ts`). Then
-> carry on from build-prompt **#4 (Connections) → #6 (Deploy) → #7 (Demo)**.
+It now includes a streamed, multi-turn AI chat experience using the Vercel AI
+SDK while still keeping the code heavily commented and beginner-readable.
+
+> **If you forked this, start here.** The template already contains all five
+> boxes. Your first moves are: **(1)** set your AI key + model in env vars if you
+> want real AI, and **(2)** edit the `SYSTEM_PROMPT` in the Intelligence box
+> (`app/api/chat/route.ts`). If `AI_API_KEY` is blank, the app still works in
+> mock mode.
+
+---
+
+## What's new in this version
+
+- Real-time streamed AI replies with the **Vercel AI SDK**.
+- Multi-turn conversation history with `useChat`.
+- Polished shadcn/ui chat interface with message bubbles, timestamps, copy, clear chat, and loading states.
+- Mock streaming mode that works with zero configuration.
+- AI SDK tool-calling example for the Connections box.
+- Browser `localStorage` memory with a one-file Supabase upgrade path.
+- `AGENTS.md` and `.cursorrules` for future coding agents.
+- Strict TypeScript and production build verification.
 
 ---
 
@@ -30,20 +44,20 @@ a live URL, pitch on Day 3.
 | # | Box | What it does | The file it lives in |
 |---|-----|--------------|----------------------|
 | 1 | **INTERFACE** | The screen the user sees | `app/page.tsx` |
-| 2 | **LOGIC** | The back room that handles the request | `app/api/generate/route.ts` |
-| 3 | **INTELLIGENCE** | The actual AI call + its personality | inside `app/api/generate/route.ts` |
-| 4 | **MEMORY** | Saves answers so they survive a refresh | `lib/memory.ts` |
-| 5 | **CONNECTIONS** | Talking to other services on the internet | `lib/connections.ts` |
+| 2 | **LOGIC** | The back room that handles chat requests | `app/api/chat/route.ts` |
+| 3 | **INTELLIGENCE** | The AI call + its personality | `SYSTEM_PROMPT` inside `app/api/chat/route.ts` |
+| 4 | **MEMORY** | Saves the chat so it survives a refresh | `lib/memory.ts` |
+| 5 | **CONNECTIONS** | Talking to other services and AI tools | `lib/connections.ts` |
 
 ### "I want to change X — which box?"
 
 - **To change what the USER SEES** (wording, layout, colours)
   → edit **`app/page.tsx`** (BOX 1, INTERFACE).
-- **To change what the APP DOES with the input** (the steps, validation)
-  → edit **`app/api/generate/route.ts`** (BOX 2, LOGIC).
+- **To change what the APP DOES with the input** (the steps, validation, tools)
+  → edit **`app/api/chat/route.ts`** (BOX 2, LOGIC).
 - **To change what the AI DOES** (its personality / instructions)
-  → edit the `SYSTEM_PROMPT` line in **`app/api/generate/route.ts`** (BOX 3, INTELLIGENCE).
-- **To change WHERE answers are saved**
+  → edit the `SYSTEM_PROMPT` line in **`app/api/chat/route.ts`** (BOX 3, INTELLIGENCE).
+- **To change WHERE chats are saved**
   → edit **`lib/memory.ts`** (BOX 4, MEMORY).
 - **To connect another outside service** (weather, CRM, payments...)
   → edit **`lib/connections.ts`** (BOX 5, CONNECTIONS).
@@ -58,20 +72,22 @@ this folder — it reads the included `.nvmrc` and picks the right version for
 you. Then:
 
 ```bash
-npm install        # download the building blocks (once)
-cp .env.example .env   # create your settings file
-npm run dev        # start the app
+npm install             # download the building blocks once
+cp .env.example .env    # create your local settings file
+npm run dev             # start the app
 ```
 
-Open **http://localhost:3000**. It works **immediately in "mock mode"** — no AI
-account needed. You'll get fake answers so you can see the whole flow first.
+Open **http://localhost:3000**. It works **immediately in mock mode** — no AI
+account needed. You'll get streamed fake answers so you can see the whole flow
+first.
 
 ---
 
 ## Turn on real AI (optional)
 
-The same code works with OpenAI, Groq, or Google Gemini — you only change
-settings, not code. Open your `.env` file and fill in:
+The app uses the Vercel AI SDK with an OpenAI-compatible provider. The same code
+works with OpenAI, Groq, or Google Gemini — you only change settings, not code.
+Open your `.env` file and fill in:
 
 | Provider | `AI_BASE_URL` | `AI_MODEL` example |
 |----------|---------------|--------------------|
@@ -96,21 +112,74 @@ If `AI_API_KEY` is blank, the app stays in friendly mock mode.
 
 ## Upgrading MEMORY to Supabase (when you outgrow the browser)
 
-Right now answers are saved in the browser (localStorage). That's per-device
-and gets cleared if the user wipes their browser. When you want answers stored
-in a real database (shared across devices, kept forever), switch to
-[Supabase](https://supabase.com):
+Right now chats are saved in the browser (`localStorage`). That's per-device and
+gets cleared if the user wipes their browser. When you want chats stored in a
+real database (shared across devices, kept forever), switch to
+[Supabase](https://supabase.com).
 
-1. Create a free Supabase project and a table called `results` with columns
-   `id` (text, primary key — `upsert` uses it to avoid duplicate rows),
-   `prompt` (text), `answer` (text), `created_at` (timestamp, default `now()`).
-2. `npm install @supabase/supabase-js`.
-3. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to `.env`.
-4. In **`lib/memory.ts`**, swap the localStorage functions for the
-   commented-out Supabase example already written at the bottom of that file.
+### 1. Create the table
 
-Nothing else in the app changes — that's the whole point of keeping MEMORY in
-its own box.
+Run this SQL in your Supabase SQL editor:
+
+```sql
+create table if not exists public.chat_sessions (
+  id text primary key,
+  messages jsonb not null default '[]'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.chat_sessions enable row level security;
+
+-- Beginner-friendly starter policy for simulator prototypes.
+-- For production apps, replace this with user-based auth policies.
+create policy "Allow anonymous simulator chat sessions"
+  on public.chat_sessions
+  for all
+  using (true)
+  with check (true);
+```
+
+### 2. Add env vars
+
+Add these to `.env`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+They are already listed as blank entries in `.env.example`.
+
+### 3. Swap the Memory box
+
+In `lib/memory.ts`, comment out the localStorage block and uncomment the
+Supabase block. Nothing else changes.
+
+That is the whole point of keeping MEMORY in its own box.
+
+---
+
+## For Coding Agents
+
+Future AI coding agents should read **`AGENTS.md`** before changing the project.
+It explains the Five Boxes architecture, project constraints, commands, and the
+rule that AI behaviour belongs in `SYSTEM_PROMPT` only.
+
+Cursor users can also rely on **`.cursorrules`** for concise project rules.
+
+---
+
+## Quality checks
+
+Before deploying or submitting changes, run:
+
+```bash
+npm run build
+npx tsc --noEmit
+npm run lint
+```
+
+Also test once with `AI_API_KEY` blank to confirm mock mode still works.
 
 ---
 
